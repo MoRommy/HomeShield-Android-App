@@ -16,9 +16,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,8 +42,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Device("Poarta", 15921, "Buftea", "locked", true)
-//                    Greeting("HomeShield")
+                    BackgroundImage(devices = arrayOf(Device("Poarta", 15921, "Buftea", "locked", true)))
+
                 }
             }
         }
@@ -45,7 +51,33 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Device(device: Device, modifier: Modifier = Modifier) {
+fun BackgroundImage(devices: Array<Device>, modifier: Modifier = Modifier) {
+    val backgroundImage = painterResource(id = R.drawable.background)
+    Box (modifier) {
+        Image(
+            painter = backgroundImage,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            alpha = 0.9F
+            )
+        DeviceLayout(device = devices[0], modifier.align(Alignment.Center))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BackgroundPreview() {
+    HomeShieldTheme {
+        BackgroundImage(
+            arrayOf(Device("Poarta", 15921, "Buftea", "locked", true))
+        )
+    }
+}
+
+@Composable
+fun DeviceLayout(device: Device, modifier: Modifier = Modifier) {
+    var lockState by remember { mutableStateOf(true) }
+    val lockImage = getLockPainterResource(lockState)
     Surface(color = Color.White, modifier = modifier) {
         Row (
             modifier = modifier,
@@ -74,28 +106,30 @@ fun Device(device: Device, modifier: Modifier = Modifier) {
             Box (contentAlignment = Alignment.Center) {
                 Button(
                     onClick = {
-                              device.locked = !device.locked
+                        device.locked = !device.locked
+                        lockState = device.locked
                     }, modifier = Modifier.padding(12.dp)
 
                 ) {
-//                    Icon(painterResource(id = R.drawable.lock), contentDescription = null)
+                    Icon(lockImage, contentDescription = null)
                 }
             }
         }
     }
 }
-//
-//fun getLockImageVector(device: Device): ImageVector {
-//    if (device.locked)
-//        return
-//    else
-//        return Icons.Rounded.
-//}
+
+@Composable
+fun getLockPainterResource(isLocked: Boolean): Painter {
+    return if (isLocked)
+        painterResource(id = R.drawable.lock)
+    else
+        painterResource(id = R.drawable.unlock)
+}
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     HomeShieldTheme {
-        Device(Device("Poarta", 15921, "Buftea", "locked", true))
+        DeviceLayout(Device("Poarta", 15921, "Buftea", "locked", true))
     }
 }
