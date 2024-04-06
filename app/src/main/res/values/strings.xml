@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">HomeShield</string>
+    <string name="sign_in_button">Sign in</string>
+    <string name="emailAddressHintText">Email</string>
+    <string name="passwordHintText">Password</string>
+    <string name="registerText">Not a member? Register here!</string>
+    <string name="signInText">Sign in</string>
+    <string name="signUpText">Sign up</string>
+    <string name="confirmPasswordHintText">Confirm password</string>
+    <string name="sign_up_button">Sign up</string>
+    <string name="loginText">Already a member? Log in here!</string>
+    <string name="signOutButtonText">Sign out</string>
+    <string name="user">"User: "</string>
 </resources>
