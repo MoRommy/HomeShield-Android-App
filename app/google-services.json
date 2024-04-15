@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "137343130548",
+    "project_id": "androidfirebase-acb7a",
+    "storage_bucket": "androidfirebase-acb7a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:137343130548:android:d226a78a70e025136ff0e1",
+        "android_client_info": {
+          "package_name": "com.example.homeshield"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKJfJX8sNOyEDbvd-dNsc8xm8aOdizWlE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

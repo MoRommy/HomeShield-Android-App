@@ -1,5 +1,6 @@
 package com.example.homeshield
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Patterns
@@ -17,35 +18,46 @@ class RegisterActivity : AppCompatActivity() {
         setContentView(R.layout.activity_register)
 
         firebaseAuth = FirebaseAuth.getInstance()
-        var singUpButton: Button = findViewById(R.id.signUpButton)
+        val singUpButton: Button = findViewById(R.id.signUpButton)
         singUpButton.setOnClickListener {
             signUp()
         }
     }
 
     private fun signUp() {
-        var emailAddressElement: EditText = findViewById(R.id.emailAddressEditText)
-        var passwordElement: EditText = findViewById(R.id.passwordEditText)
-        var confirmPasswordElement: EditText = findViewById(R.id.confirmPasswordEditText)
+        val emailAddressElement: EditText = findViewById(R.id.emailAddressEditText)
+        val passwordElement: EditText = findViewById(R.id.passwordEditText)
+        val confirmPasswordElement: EditText = findViewById(R.id.confirmPasswordEditText)
 
-        var emailAddress = emailAddressElement.text.toString()
-        var password = passwordElement.text.toString()
-        var confirmPassword = confirmPasswordElement.text.toString()
+        val emailAddress = emailAddressElement.text.toString()
+        val password = passwordElement.text.toString()
+        val confirmPassword = confirmPasswordElement.text.toString()
 
+        checkCredentials(emailAddress, password, confirmPassword)
+    }
+
+    private fun checkCredentials(
+        emailAddress: String,
+        password: String,
+        confirmPassword: String
+    ) {
         if (emailAddress.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty()) {
             if (password == confirmPassword) {
-                if (Patterns.EMAIL_ADDRESS.matcher(emailAddress).matches() &&
-                    password.length >= 6) {
+                if (Patterns.EMAIL_ADDRESS.matcher(emailAddress).matches()) {
                     firebaseAuth.createUserWithEmailAndPassword(emailAddress, password).addOnCompleteListener(this) {
                         if (it.isSuccessful) {
-                            Toast.makeText(this, "Register complete!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "Register complete!", Toast.LENGTH_SHORT)
+                                .show()
                             finish()
+                            startActivity(Intent(this, MainActivity::class.java))
                         } else {
-                            Toast.makeText(this, it.result.toString(), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this,
+                                it.exception?.message.toString(),
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
-                } else {
-                    Toast.makeText(this, "Invalid email format!", Toast.LENGTH_SHORT).show()
                 }
             } else {
                 Toast.makeText(this, "Passwords do not match!", Toast.LENGTH_SHORT).show()
