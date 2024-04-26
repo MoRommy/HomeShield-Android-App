@@ -17,6 +17,6 @@ interface WeatherService {
         @Path("location_id") locationId: String,
         @Query("apikey") apiKey: String,
         @Query("metric") metric: Boolean  // true for Celsius, false for Fahrenheit
-    ): Call<List<DailyWeatherData>>
+    ): Call<DailyWeatherData>
 
 }

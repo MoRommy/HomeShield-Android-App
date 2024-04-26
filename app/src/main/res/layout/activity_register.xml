@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/signUpTextViewId"
         android:text="@string/signUpText"
-        android:textSize="32dp"
+        android:textSize="32sp"
         android:layout_marginTop="56dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -75,7 +75,7 @@
             app:layout_constraintTop_toBottomOf="@+id/confirmPasswordEditText" />
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/loginTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/loginText"

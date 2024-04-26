@@ -14,10 +14,10 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.workDataOf
 import com.example.homeshield.workers.WeatherWorker
 import com.google.firebase.auth.FirebaseAuth
 import java.time.Duration
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
@@ -48,19 +48,34 @@ class MainActivity : ComponentActivity() {
             startActivity(intent)
         }
 
-
         val workRequest = PeriodicWorkRequestBuilder<WeatherWorker>(
-            repeatInterval = 15,
-            repeatIntervalTimeUnit = TimeUnit.SECONDS
+            repeatInterval = 24,
+            repeatIntervalTimeUnit = TimeUnit.HOURS
+        ).setInitialDelay(
+            calculateInitialDelay(), TimeUnit.MILLISECONDS
         ).setBackoffCriteria(
             backoffPolicy = BackoffPolicy.LINEAR,
-            duration = Duration.ofSeconds(5)
+            duration = Duration.ofSeconds(25)
         ).setConstraints(
             Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
         ).build()
 
         val workManager = WorkManager.getInstance(applicationContext)
+        workManager.enqueue(workRequest)
         workManager.enqueueUniquePeriodicWork("weatherWork", ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, workRequest)
-        workManager.cancelUniqueWork("weatherWork")
+//        workManager.cancelUniqueWork("weatherWork")
     }
+
+    fun calculateInitialDelay(): Long {
+        val calendar = Calendar.getInstance()
+        val now = calendar.timeInMillis
+        calendar.set(Calendar.HOUR_OF_DAY, 8)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        if (calendar.timeInMillis < now) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1)
+        }
+        return calendar.timeInMillis - now
+    }
+
 }

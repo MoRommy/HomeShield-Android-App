@@ -1,11 +1,8 @@
 package com.example.homeshield.weather
 
-import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Path
-import retrofit2.http.Query
 
 class Weather {
     private val weatherService: WeatherService
@@ -21,19 +18,22 @@ class Weather {
         weatherService = retrofit.create(WeatherService::class.java)
     }
 
-    fun getDailyWeather(callback: Callback<List<DailyWeatherData>>) {
+    fun getDailyWeather(callback: Callback<DailyWeatherData>) {
         val call = weatherService.getDailyWeather(locationId, apiKey, true)
         call.enqueue(callback)
     }
 
-
-    fun getLocation(city: String, callback: Callback<List<LocationResponse>>) {
+    fun getCityId(city: String, callback: Callback<List<LocationResponse>>) {
         val call = weatherService.getLocation(apiKey, city)
         call.enqueue(callback)
     }
 
     fun setLocationId(id: String) {
         locationId = id
+    }
+
+    fun getLocationId(): String {
+        return locationId
     }
 
 }

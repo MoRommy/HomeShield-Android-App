@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 
@@ -21,6 +22,13 @@ class RegisterActivity : AppCompatActivity() {
         val singUpButton: Button = findViewById(R.id.signUpButton)
         singUpButton.setOnClickListener {
             signUp()
+        }
+
+        val loginTextView: TextView = findViewById(R.id.loginTextView)
+        loginTextView.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            finish()
+            startActivity(intent)
         }
     }
 
