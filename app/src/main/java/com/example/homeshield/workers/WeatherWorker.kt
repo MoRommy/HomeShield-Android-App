@@ -7,7 +7,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.homeshield.weather.DailyWeatherData
 import com.example.homeshield.weather.LocationResponse
-import com.example.homeshield.weather.Weather
+import com.example.homeshield.weather.WeatherManager
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -59,7 +59,7 @@ class WeatherWorker(context: Context, params: WorkerParameters): CoroutineWorker
         Result.success()
     }
 
-    private fun checkDailyWeather(weather: Weather) {
+    private fun checkDailyWeather(weather: WeatherManager) {
         Log.d("WeatherData", "Checking daily weather")
         weather.getDailyWeather(object : Callback<DailyWeatherData> {
             override fun onResponse(
@@ -97,7 +97,7 @@ class WeatherWorker(context: Context, params: WorkerParameters): CoroutineWorker
                 (!dailyWeather.dailyForecasts[0].day.hasPrecipitation)
     }
 
-    private fun getWeather(): Weather {
+    private fun getWeather(): WeatherManager {
         // Retrieve the JSON string
         val weather = sharedPreferences.getString("weather", null)
 
@@ -105,14 +105,14 @@ class WeatherWorker(context: Context, params: WorkerParameters): CoroutineWorker
         return if (weather != null) {
             Log.d("Serializer", "Instance deserialized")
             val gson = Gson()
-            gson.fromJson(weather, Weather::class.java)
+            gson.fromJson(weather, WeatherManager::class.java)
         } else {
             Log.d("Serializer", "New instance created")
-            Weather()
+            WeatherManager()
         }
     }
 
-    fun serializeWeather(weather: Weather) {
+    fun serializeWeather(weather: WeatherManager) {
         val editor = sharedPreferences.edit()
 
         // Serialize the user profile to JSON

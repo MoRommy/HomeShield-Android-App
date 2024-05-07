@@ -4,7 +4,7 @@ import retrofit2.Callback
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class Weather {
+class WeatherManager {
     private val weatherService: WeatherService
     private val apiKey = "K0r1j3FLuXdQExRro2D0HyUQzrW7ojzv"
     private var locationId: String = ""
