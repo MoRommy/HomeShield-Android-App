@@ -31,12 +31,12 @@
         android:id="@+id/whitelistTextView"
         android:layout_width="wrap_content"
         android:layout_height="400dp"
-        android:text="B72ETS\n\nPH12ADS\n\nB14BIW\n\nB14BIW\n\nB14BIW\n\n"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/whitelistPageTitle"
         android:layout_margin="60dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="56dp"
         android:textSize="24dp"
-        />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/whitelistPageTitle" />
 
     <EditText
         android:id="@+id/plateNumberEditText"

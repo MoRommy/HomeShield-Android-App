@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-class DeviceHistoryFrame : Fragment(R.layout.frame_device_history), BackPressHandler {
+class DeviceHistoryFrame(private val mqttHelper: MqttHelper) : Fragment(), BackPressHandler {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -35,7 +35,7 @@ class DeviceHistoryFrame : Fragment(R.layout.frame_device_history), BackPressHan
         editWhitelistButton.setOnClickListener {
             if (savedInstanceState == null) {
                 childFragmentManager.beginTransaction()
-                    .replace(R.id.whitelistFrame, WhitelistFrame())
+                    .replace(R.id.whitelistFrame, WhitelistFrame(mqttHelper))
                     .commitNow()
             }
         }
