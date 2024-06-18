@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/background">
+
+    <TextView
+        android:id="@+id/whitelistPageTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="60dp"
+        android:textSize="30dp"
+        android:text="IDs whitelist"
+        android:textAlignment="center"
+        />
+
+    <Button
+        android:id="@+id/refreshWhitelistButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/reload"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/whitelistPageTitle"
+        android:layout_marginEnd="40dp"
+        />
+
+    <TextView
+        android:id="@+id/whitelistTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="400dp"
+        android:text="B72ETS\n\nPH12ADS\n\nB14BIW\n\nB14BIW\n\nB14BIW\n\n"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/whitelistPageTitle"
+        android:layout_margin="60dp"
+        android:textSize="24dp"
+        />
+
+    <EditText
+        android:id="@+id/plateNumberEditText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/addPlateIdButton"
+        android:hint="AB01CDE"
+        android:layout_margin="32dp"
+        />
+
+    <Button
+        android:id="@+id/addPlateIdButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/removePlateIdButton"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="ADD"
+        android:layout_margin="32dp"
+        />
+
+    <Button
+        android:id="@+id/removePlateIdButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/addPlateIdButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="REMOVE"
+        android:layout_margin="32dp"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

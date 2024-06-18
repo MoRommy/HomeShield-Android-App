@@ -1,36 +1,36 @@
 package com.example.homeshield
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
-import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.RequiresApi
-import androidx.recyclerview.widget.RecyclerView
-import androidx.work.BackoffPolicy
-import androidx.work.Constraints
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.NetworkType
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
-import com.example.homeshield.device.Device
-import com.example.homeshield.device.DeviceData
-import com.example.homeshield.device.DeviceManager
-import com.example.homeshield.weather.LocationResponse
-import com.example.homeshield.workers.WeatherWorker
+import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.time.Duration
-import java.util.Calendar
-import java.util.concurrent.TimeUnit
+import info.mqtt.android.service.MqttAndroidClient;
+import org.eclipse.paho.client.mqttv3.IMqttActionListener
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
+import org.eclipse.paho.client.mqttv3.IMqttToken
+import org.eclipse.paho.client.mqttv3.MqttCallback
+import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions
+import org.eclipse.paho.client.mqttv3.MqttException
+import org.eclipse.paho.client.mqttv3.MqttMessage
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
     private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var mqttClient: MqttAndroidClient
+    private lateinit var lockUnlockButton: ImageView
+    private lateinit var connectivityStatusImageView: ImageView
+    private lateinit var deviceStatusTextView: TextView
+    private var openCloseState = 0
 
     @SuppressLint("NotifyDataSetChanged")
     @RequiresApi(Build.VERSION_CODES.S)
@@ -41,6 +41,28 @@ class MainActivity : ComponentActivity() {
 
         firebaseAuth = FirebaseAuth.getInstance()
 
+
+        val deviceIconImageView: ImageView = findViewById(R.id.deviceIconImageView)
+        deviceIconImageView.setOnClickListener {
+            if (savedInstanceState == null) {
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.deviceActivityFrame, DeviceHistoryFrame())
+                    .commitNow()
+            }
+        }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val fragment = supportFragmentManager.findFragmentById(R.id.deviceActivityFrame)
+                if (fragment is BackPressHandler && fragment.onBackPressed()) {
+                    // The fragment handled the back press event
+                } else {
+                    // Default back press behavior
+                    finish()
+                }
+            }
+        })
+
         val user = firebaseAuth.currentUser
         if (user == null) {
             val intent = Intent(this, LoginActivity::class.java)
@@ -48,8 +70,8 @@ class MainActivity : ComponentActivity() {
             finish()
         }
 
-        val textView: TextView = findViewById(R.id.activityMainTextView)
-        textView.text = getString(R.string.user).plus(user?.email)
+        val userNameTextView: TextView = findViewById(R.id.activityMainTextView)
+        userNameTextView.text = getString(R.string.user).plus(user?.email)
 
         val signOutButton: Button = findViewById(R.id.signOutButton)
         signOutButton.setOnClickListener {
@@ -58,83 +80,128 @@ class MainActivity : ComponentActivity() {
             startActivity(intent)
         }
 
+        lockUnlockButton = findViewById(R.id.deviceCommandImageView)
+        connectivityStatusImageView = findViewById(R.id.connectivityStatusImageView)
+        deviceStatusTextView = findViewById(R.id.deviceStatusTextView)
+        
+        mqttConnect(this.applicationContext, "192.168.0.177", "", "")
 
-
-
-
-
-
-
-        val workRequest = PeriodicWorkRequestBuilder<WeatherWorker>(
-            repeatInterval = 24,
-            repeatIntervalTimeUnit = TimeUnit.HOURS
-        ).setInitialDelay(
-            calculateInitialDelay(), TimeUnit.MILLISECONDS
-        ).setBackoffCriteria(
-            backoffPolicy = BackoffPolicy.LINEAR,
-            duration = Duration.ofSeconds(25)
-        ).setConstraints(
-            Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-        ).build()
-
-        val workManager = WorkManager.getInstance(applicationContext)
-        workManager.cancelUniqueWork("weatherWork")
-        workManager.enqueue(workRequest)
-        workManager.enqueueUniquePeriodicWork("weatherWork", ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE, workRequest)
-
-
-
-
-        val devices = mutableListOf<Device>()
-
-        val deviceManager = DeviceManager()
-        deviceManager.getDevice(object : Callback<DeviceData> {
-            override fun onResponse(call: Call<DeviceData>, response: Response<DeviceData>) {
-                response.body()?.let { devices.add(it.device) }
-                Log.d("DeviceData", devices.toString())
+        lockUnlockButton.setOnClickListener {
+            if (openCloseState == 0) {
+                mqttPublish("1001/open", "", 0)
+            } else {
+                mqttPublish("1001/close", "", 0)
             }
-
-            override fun onFailure(call: Call<DeviceData>, t: Throwable) {
-                Log.d("DeviceData", t.message.toString())
-            }
-
-        })
-
-
-
-
-        val recyclerView: RecyclerView = findViewById(R.id.devicesRecyclerView)
-        recyclerView.adapter = DeviceAdapter(devices)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    }
-
-    private fun calculateInitialDelay(): Long {
-        val calendar = Calendar.getInstance()
-        val now = calendar.timeInMillis
-        calendar.set(Calendar.HOUR_OF_DAY, 8)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        if (calendar.timeInMillis < now) {
-            calendar.add(Calendar.DAY_OF_YEAR, 1)
         }
-        return calendar.timeInMillis - now
+
+
     }
+
+
+
+    fun mqttConnect(applicationContext: Context, brokeraddr: String, clientuser: String, clientpwd: String) {
+        // ClientId is a unique id used to identify a client
+        val clientId = MqttClient.generateClientId()
+
+        Log.d("MqttClient", "Connecting")
+        // Create an MqttAndroidClient instance
+        mqttClient = MqttAndroidClient ( applicationContext, "tcp://$brokeraddr", clientId )
+
+
+        // ConnectOption is used to specify username and password
+        val connOptions = MqttConnectOptions()
+//            connOptions.userName = clientuser
+//            connOptions.password = clientpwd.toCharArray()
+
+
+        try {
+            // Perform connection
+            mqttClient.connect(connOptions, null, object : IMqttActionListener {
+                override fun onSuccess(asyncActionToken: IMqttToken) {
+                    // Add here code executed in case of successful connection
+                    Log.d("MqttClient", "Connection success")
+                    mqttSubscribe("#", 0)
+                    mqttSetReceiveListener()
+                    mqttPublish("1001/get_device_status", "", 0)
+                }
+                override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
+                    // Add here code executed in case of failed connection
+                    Log.d("MqttClient", "Connection failed")
+                    exception.message?.let { Log.d("MqttClient", it) }
+                }
+            })
+        } catch (e: MqttException) {
+            // Get stack trace
+
+            Log.d("MqttClient", "Exception")
+            e.printStackTrace()
+        }
+    }
+
+    fun mqttSetReceiveListener() {
+        mqttClient.setCallback(object : MqttCallback {
+            override fun connectionLost(cause: Throwable) {
+                // Connection Lost
+            }
+            override fun messageArrived(topic: String, message: MqttMessage) {
+
+                if (topic == "TM/1001/device_status") {
+                    val data = String(message.payload, charset("UTF-8"))
+                    val status = "Status: " + data.substring(10)
+                    connectivityStatusImageView.setBackgroundResource(R.drawable.connected)
+                    deviceStatusTextView.text = status
+
+                    if (status == "Status: CLOSED") {
+                        lockUnlockButton.setBackgroundResource(R.drawable.lock)
+                        openCloseState = 0
+                    } else {
+                        lockUnlockButton.setBackgroundResource(R.drawable.unlock)
+                        openCloseState = 1
+                    }
+                }
+
+                // A message has been received
+//                val data = String(message.payload, charset("UTF-8"))
+                // Place the message into a specific TextBox object
+//                Toast.makeText(this@MainActivity, "$topic: $data", Toast.LENGTH_SHORT).show()
+
+            }
+            override fun deliveryComplete(token: IMqttDeliveryToken) {
+                // Delivery complete
+            }
+        })
+    }
+
+    fun mqttSubscribe(topic: String, qos: Int) {
+        try {
+            Log.d("MqttClient", "Subscribing to $topic")
+            mqttClient.subscribe(topic, qos, null, object : IMqttActionListener {
+                override fun onSuccess(asyncActionToken: IMqttToken) {
+                    // Successful subscribe
+                    Log.d("MqttClient", "Subscription success")
+                }override fun onFailure(asyncActionToken: IMqttToken, exception: Throwable) {
+                    // Failed subscribe
+                    Log.d("MqttClient", "Subscription failure")
+                }
+            })
+        } catch (e: MqttException) {
+            // Check error
+            Log.d("MqttClient", "Subscription exception")
+        }
+    }
+
+    fun mqttPublish(topic: String, msg: String, qos: Int) {
+        try {
+            val mqttMessage = MqttMessage(msg.toByteArray(charset("UTF-8")))
+            mqttMessage.qos = qos
+            mqttMessage.isRetained = false
+            // Publish the message
+            mqttClient.publish(topic, mqttMessage)
+        } catch (e: Exception) {
+            // Check exception
+        }
+    }
+
+
 
 }
