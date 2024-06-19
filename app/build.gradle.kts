@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    id("kotlinx-serialization")
 }
 
 android {
@@ -53,6 +54,9 @@ android {
 
 dependencies {
 
+    implementation ("androidx.appcompat:appcompat:1.7.0")
+    implementation ("com.google.code.gson:gson:2.10")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("androidx.fragment:fragment-ktx:1.8.0")
     implementation (files("../libs/serviceLibrary-release.aar"))
     implementation ("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")

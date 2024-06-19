@@ -10,9 +10,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import org.eclipse.paho.client.mqttv3.IMqttActionListener
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
-import org.eclipse.paho.client.mqttv3.IMqttToken
 import org.eclipse.paho.client.mqttv3.MqttCallback
 import org.eclipse.paho.client.mqttv3.MqttMessage
 
@@ -31,14 +29,15 @@ class WhitelistFrame(private val mqttHelper: MqttHelper) : Fragment(), BackPress
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.frame_whitelist, container, false)
 
-        mqttHelper.setCallback(createMqttCallback())
-        mqttHelper.publish("1001/get_whitelist", "", 0)
-
         whitelistTextView = view.findViewById(R.id.whitelistTextView)
         refreshWhitelistButton = view.findViewById(R.id.refreshWhitelistButton)
         addPlateIdButton = view.findViewById(R.id.addPlateIdButton)
         removePlateIdButton = view.findViewById(R.id.removePlateIdButton)
         plateNumberEditText = view.findViewById(R.id.plateNumberEditText)
+
+
+        mqttHelper.setCallback(createMqttCallback())
+        mqttHelper.publish("1001/get_whitelist", "", 0)
 
         refreshWhitelistButton.setOnClickListener {
             mqttHelper.publish("1001/get_whitelist", "", 0)
@@ -57,7 +56,6 @@ class WhitelistFrame(private val mqttHelper: MqttHelper) : Fragment(), BackPress
                 mqttHelper.publish("1001/get_whitelist", "", 0)
             }
         }
-
 
         return view
     }
@@ -82,13 +80,11 @@ class WhitelistFrame(private val mqttHelper: MqttHelper) : Fragment(), BackPress
 
             @SuppressLint("LogNotTimber")
             override fun messageArrived(topic: String?, message: MqttMessage?) {
-                Log.d("MqttClient - Whitelist", "Message arrived" + topic + message.toString())
                 if (topic == "TM/1001/whitelist") {
                     val whitelist = transformStringToArray(message.toString())
                     var result = ""
                     for (id in whitelist)
                         result += id + "\n\n"
-
                     whitelistTextView.text = result
                 }
             }
@@ -96,13 +92,9 @@ class WhitelistFrame(private val mqttHelper: MqttHelper) : Fragment(), BackPress
     }
 
     fun transformStringToArray(input: String): Array<String> {
-        // Remove the surrounding square brackets and single quotes, then split by comma
         return input.removeSurrounding("[", "]")
             .split(", ")
             .map { it.trim('\'') }
             .toTypedArray()
     }
-
-
-
 }

@@ -50,24 +50,24 @@
         />
 
     <Button
-        android:id="@+id/addPlateIdButton"
+        android:id="@+id/removePlateIdButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/removePlateIdButton"
+        app:layout_constraintEnd_toStartOf="@id/addPlateIdButton"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="ADD"
+        android:text="REMOVE"
         android:layout_margin="32dp"
         />
 
     <Button
-        android:id="@+id/removePlateIdButton"
+        android:id="@+id/addPlateIdButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toEndOf="@id/addPlateIdButton"
+        app:layout_constraintStart_toEndOf="@id/removePlateIdButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="REMOVE"
+        android:text="ADD"
         android:layout_margin="32dp"
         />
 

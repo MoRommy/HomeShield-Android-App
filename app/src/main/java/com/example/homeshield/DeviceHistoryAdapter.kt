@@ -1,21 +1,24 @@
 package com.example.homeshield
 
-import android.media.Image
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import android.graphics.BitmapFactory
+import android.util.Base64
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Event(
-    val photo: Image?,
     val action: String,
-    val initiator: String,
-    val timestamp: String
+    val commander: String,
+    var timestamp: String,
+    val photo: String
 )
 
-class DeviceHistoryAdapter(private val dataSet: Array<Event>) :
+class DeviceHistoryAdapter(private val dataSet: MutableList<Event>) :
     RecyclerView.Adapter<DeviceHistoryAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -44,8 +47,14 @@ class DeviceHistoryAdapter(private val dataSet: Array<Event>) :
         // Get element from your dataset at this position and replace the
         // contents of the view with that element
         val event: Event = dataSet[position]
-//        viewHolder.imageView.
-        val text = "ACTION: " + event.action + "\n" + "INITIATED BY: " + event.initiator + "\n" + "TIMESTAMP: " + event.timestamp
+
+        val decodedString = Base64.decode(event.photo, Base64.DEFAULT)
+        // Convert the decoded byte array into a bitmap
+        val decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.size)
+        // Set the bitmap to the ImageView
+
+        viewHolder.imageView.setImageBitmap(decodedByte)
+        val text = "ACTION: " + event.action + "\n" + "INITIATED BY: " + event.commander + "\n" + "TIMESTAMP: " + event.timestamp
         viewHolder.eventInfoTextView.text = text
     }
 
